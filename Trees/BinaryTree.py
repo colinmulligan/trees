@@ -80,6 +80,7 @@ class BinaryTree():
         Implement this function.
         The lecture notes videos provide the exact code you need.
         '''
+
         if start:
             traversal += (str(start.value) + '-')
             traversal = self.preorder_print(start.left,traversal)

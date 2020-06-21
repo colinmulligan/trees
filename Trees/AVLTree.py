@@ -5,8 +5,10 @@ The functions in this file are considerably harder than the functions in the Bin
 
 from Trees.BinaryTree import BinaryTree, Node
 from Trees.BST import BST
+# from BinaryTree import BinaryTree, Node
+# from BST import BST
 
-class AVLTree():
+class AVLTree(BST):
     '''
     FIXME:
     AVLTree is currently not a subclass of BST.
@@ -19,7 +21,9 @@ class AVLTree():
         FIXME:
         Implement this function.
         '''
-
+        super().__init__()
+        if xs:
+            self.insert_list(xs)
 
     def balance_factor(self):
         '''
@@ -43,12 +47,16 @@ class AVLTree():
         '''
         return AVLTree._is_avl_satisfied(self.root)
 
+
     @staticmethod
     def _is_avl_satisfied(node):
         '''
         FIXME:
         Implement this function.
         '''
+        if node is None:
+            return True
+        return AVLTree._balance_factor(node) in [-1, 0, 1] and AVLTree._is_avl_satisfied(node.left) and AVLTree._is_avl_satisfied(node.right)
 
 
     @staticmethod
@@ -62,7 +70,15 @@ class AVLTree():
         The textbook's class hierarchy for their AVL tree code is fairly different from our class hierarchy,
         however, so you will have to adapt their code.
         '''
-
+        if node is None or node.right is None:
+            return node
+        temp = Node(node.right.value)
+        temp.right = node.right.right
+        new = Node(node.value)
+        new.left = node.left
+        new.right = node.right.left
+        temp.left = new
+        return temp
 
     @staticmethod
     def _right_rotate(node):
@@ -75,7 +91,15 @@ class AVLTree():
         The textbook's class hierarchy for their AVL tree code is fairly different from our class hierarchy,
         however, so you will have to adapt their code.
         '''
-
+        if node is None or node.left is None:
+            return node
+        temp = Node(node.left.value)
+        temp.left = node.left.left
+        new = Node(node.value)
+        new.right = node.right
+        new.left = node.left.right
+        temp.right = new
+        return temp
 
     def insert(self, value):
         '''
@@ -92,3 +116,57 @@ class AVLTree():
         The code should look very similar to the code for your insert function for the BST,
         but it will also call the left and right rebalancing functions.
         '''
+        if self.root is None:
+            self.root = Node(value)
+        else:
+            self.root = AVLTree._insert(value,self.root)
+
+    def insert_list(self, xs):
+        '''
+        Given a list xs, insert each element of xs into self.
+        FIXME:
+        Implement this function.
+        '''
+        for element in xs:
+            self.insert(element)
+
+    @staticmethod
+    def _rebalance(node):
+        if AVLTree._balance_factor(node) > 1:
+            if AVLTree._balance_factor(node.left) < 0:
+                node.left=AVLTree._left_rotate(node.left)
+                return AVLTree._right_rotate(node)
+            else:
+                return AVLTree._right_rotate(node)
+
+        elif AVLTree._balance_factor(node) < -1:
+            if AVLTree._balance_factor(node.right) > 0:
+                node.right=AVLTree._right_rotate(node.right)
+                return AVLTree._left_rotate(node)
+            else:
+                return AVLTree._left_rotate(node)
+        else:
+            return node
+
+
+    @staticmethod
+    def _insert(value,node):
+        if value < node.value:
+            if node.left is None:
+                node.left = Node(value)
+            else:
+                AVLTree._insert(value, node.left)
+        elif value > node.value:
+            if node.right is None:
+                node.right = Node(value)
+            else:
+                AVLTree._insert(value, node.right)
+        else:
+            print("value is already present in tree")
+
+        if not AVLTree._is_avl_satisfied(node):
+            node.left = AVLTree._rebalance(node.left)
+            node.right = AVLTree._rebalance(node.right)
+            return AVLTree._rebalance(node)
+        else:
+            return node
